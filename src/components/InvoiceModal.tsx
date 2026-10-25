@@ -266,6 +266,11 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   const cleanStaffName = getCleanStaffName(delivery.staffName);
 
   const handlePrint = () => {
+    try {
+      dataService.logInvoicePrint(delivery.id, delivery.beneficiaryName);
+    } catch (e) {
+      console.warn('Failed to log invoice print:', e);
+    }
     window.print();
   };
 
@@ -305,6 +310,12 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
         document.body.removeChild(link);
         setExportSuccess(true);
         setTimeout(() => setExportSuccess(false), 3000);
+
+        try {
+          dataService.logInvoiceDownload(delivery.id, delivery.beneficiaryName);
+        } catch (e) {
+          console.warn('Failed to log invoice download:', e);
+        }
       }
     } catch (err) {
       console.error('Failed to export invoice image:', err);

@@ -1667,7 +1667,13 @@ class DataService {
     deliveriesList.unshift(deliveryRecord);
     this.setStorage(STORAGE_KEYS.DELIVERIES, deliveriesList);
 
-    // 6. Record Audit Log
+    // 6. Record Audit Logs (Delivery Dispatch + Official Invoice Issuance with date & time)
+    const invoiceNum = `#${deliveryId.slice(0, 10).toUpperCase()}`;
+    const invoiceTimeArabic = new Intl.DateTimeFormat('ar-EG', {
+      dateStyle: 'full',
+      timeStyle: 'medium',
+    }).format(new Date());
+
     this.recordAuditLog({
       action: 'DELIVERY_DISPATCH',
       actorId: params.staffId,
@@ -1676,6 +1682,16 @@ class DataService {
       targetId: beneficiary.id,
       targetName: beneficiary.fullName,
       details: `صرف سلع تموينية بإجمالي ${totalPoints} نقطة للمستفيد ${beneficiary.fullName} باستخدام كود (${params.code}). الرصيد المتبقي: ${balanceAfter} نقطة`,
+    });
+
+    this.recordAuditLog({
+      action: 'INVOICE_ISSUED',
+      actorId: params.staffId,
+      actorName: params.staffName,
+      actorRole: 'staff',
+      targetId: deliveryId,
+      targetName: `فاتورة تسليم رقم ${invoiceNum}`,
+      details: `إصدار وتوثيق فاتورة تسليم رسمية رقم ${invoiceNum} للمستفيد (${beneficiary.fullName}) بتاريخ ووقت: ${invoiceTimeArabic} - إجمالي المنصرف: ${totalPoints} نقطة`,
     });
 
     return {
@@ -1869,12 +1885,38 @@ class DataService {
     URL.revokeObjectURL(url);
   }
 
-  // ================= Association Settings =================
+  // ================= Association & Invoice Phone =================
+  /**
+   * Retrieves the association phone dynamically from the administrator's account.
+   * When the administrator changes their phone number in staff management,
+   * it automatically reflects across all invoices in real-time.
+   */
   getAssociationPhone(): string {
+    const staffList = this.getStaffAccounts();
+    // 1. Look for active administrator with a phone number
+    const adminWithPhone = staffList.find(
+      (s) => s.role === 'admin' && s.isActive && s.phone && s.phone.trim().length > 0
+    );
+    if (adminWithPhone?.phone) {
+      return adminWithPhone.phone.trim();
+    }
+    // 2. Look for any admin with phone number
+    const anyAdminWithPhone = staffList.find(
+      (s) => s.role === 'admin' && s.phone && s.phone.trim().length > 0
+    );
+    if (anyAdminWithPhone?.phone) {
+      return anyAdminWithPhone.phone.trim();
+    }
+    // 3. Fallback from current user if admin
+    const current = this.getCurrentUser();
+    if (current?.role === 'admin' && current.phone && current.phone.trim().length > 0) {
+      return current.phone.trim();
+    }
+    // 4. Default fallback
     const settings = this.getStorage<{ phone: string }>(STORAGE_KEYS.SETTINGS, {
       phone: '01012345678',
     });
-    return settings.phone || '01012345678';
+    return settings?.phone || '01012345678';
   }
 
   updateAssociationPhone(phone: string): { success: boolean; error?: string } {
@@ -1891,12 +1933,50 @@ class DataService {
         actorId: current.id,
         actorName: current.fullName,
         actorRole: current.role,
-        targetName: 'إعدادات الفاتورة',
-        details: `تحديث رقم هاتف الجمعية المطبوع على الفاتورة إلى: ${cleanPhone}`,
+        targetName: 'هاتف الفاتورة',
+        details: `تحديث رقم هاتف الفاتورة إلى: ${cleanPhone}`,
       });
     }
 
     return { success: true };
+  }
+
+  logInvoicePrint(deliveryId: string, beneficiaryName: string): void {
+    const current = this.getCurrentUser();
+    const invoiceNum = `#${deliveryId.slice(0, 10).toUpperCase()}`;
+    const formattedTime = new Intl.DateTimeFormat('ar-EG', {
+      dateStyle: 'medium',
+      timeStyle: 'medium',
+    }).format(new Date());
+
+    this.recordAuditLog({
+      action: 'INVOICE_PRINTED',
+      actorId: current?.id || 'system',
+      actorName: current?.fullName || 'مسؤول الصرف',
+      actorRole: current?.role || 'staff',
+      targetId: deliveryId,
+      targetName: `فاتورة رقم ${invoiceNum}`,
+      details: `طباعة إيصال الفاتورة الرسمية رقم ${invoiceNum} للمستفيد (${beneficiaryName}) بتاريخ ووقت: ${formattedTime}`,
+    });
+  }
+
+  logInvoiceDownload(deliveryId: string, beneficiaryName: string): void {
+    const current = this.getCurrentUser();
+    const invoiceNum = `#${deliveryId.slice(0, 10).toUpperCase()}`;
+    const formattedTime = new Intl.DateTimeFormat('ar-EG', {
+      dateStyle: 'medium',
+      timeStyle: 'medium',
+    }).format(new Date());
+
+    this.recordAuditLog({
+      action: 'INVOICE_DOWNLOADED',
+      actorId: current?.id || 'system',
+      actorName: current?.fullName || 'مسؤول الصرف',
+      actorRole: current?.role || 'staff',
+      targetId: deliveryId,
+      targetName: `فاتورة رقم ${invoiceNum}`,
+      details: `تحميل وحفظ صورة الفاتورة الرسمية رقم ${invoiceNum} للمستفيد (${beneficiaryName}) بتاريخ ووقت: ${formattedTime}`,
+    });
   }
 }
 

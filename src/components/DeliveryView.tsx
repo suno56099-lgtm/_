@@ -261,8 +261,8 @@ export const DeliveryView: React.FC<DeliveryViewProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !isMonthClosed) handleVerify();
               }}
-              placeholder={isMonthClosed ? 'الشهر مغلق ولا يقبل الصرف' : 'أدخل كود الاستلام الشهري...'}
-              className="w-full max-w-sm mx-auto text-center font-mono text-base sm:text-lg font-extrabold tracking-wider px-4 py-3 rounded-2xl bg-[#1C2521] border-2 border-[#26312C] focus:border-[#34C38F] text-[#E0B35A] focus:outline-none shadow-inner disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder={isMonthClosed ? 'الشهر مغلق ولا يقبل الصرف' : 'أدخل كود الاستعلام الشهري...'}
+              className="w-full max-w-sm mx-auto text-center font-mono text-base sm:text-lg font-extrabold tracking-wider px-4 py-3 rounded-2xl bg-[#1C2521] border-2 border-[#26312C] focus:border-[#34C38F] text-[#E0B35A] focus:outline-none shadow-inner disabled:opacity-50 disabled:cursor-not-allowed placeholder:font-['Cairo',sans-serif] placeholder:font-medium placeholder:tracking-normal"
             />
 
             <div>

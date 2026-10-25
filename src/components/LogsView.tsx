@@ -10,6 +10,7 @@ import {
   Sparkles,
   UserCheck,
   Receipt,
+  Printer,
 } from 'lucide-react';
 import { DeliveryRecord, AuditLogEntry } from '../types/index.ts';
 import { dataService } from '../services/dataService.ts';
@@ -60,6 +61,27 @@ export const LogsView: React.FC<LogsViewProps> = ({ deliveries, auditLogs }) => 
   // Action badge renderer
   const renderAuditBadge = (action: string) => {
     switch (action) {
+      case 'INVOICE_ISSUED':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#34C38F]/15 text-[#34C38F] border border-[#34C38F]/30 font-semibold text-[11px]">
+            <Receipt className="w-3 h-3 text-[#34C38F]" />
+            <span>إصدار فاتورة</span>
+          </span>
+        );
+      case 'INVOICE_PRINTED':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E0B35A]/15 text-[#E0B35A] border border-[#E0B35A]/30 font-semibold text-[11px]">
+            <Printer className="w-3 h-3 text-[#E0B35A]" />
+            <span>طباعة فاتورة</span>
+          </span>
+        );
+      case 'INVOICE_DOWNLOADED':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#34C38F]/15 text-[#34C38F] border border-[#34C38F]/30 font-semibold text-[11px]">
+            <Download className="w-3 h-3 text-[#34C38F]" />
+            <span>تحميل فاتورة</span>
+          </span>
+        );
       case 'NATIONAL_ID_REVEAL':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E0B35A]/15 text-[#E0B35A] border border-[#E0B35A]/30 font-semibold text-[11px]">

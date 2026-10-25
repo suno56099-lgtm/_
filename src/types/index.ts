@@ -138,7 +138,10 @@ export type AuditActionType =
   | 'MONTH_CLOSE'
   | 'MONTH_OPEN'
   | 'MONTH_CREATE'
-  | 'ACTIVE_MONTH_SET';
+  | 'ACTIVE_MONTH_SET'
+  | 'INVOICE_ISSUED'
+  | 'INVOICE_PRINTED'
+  | 'INVOICE_DOWNLOADED';
 
 export interface AuditLogEntry {
   id: string;

@@ -60,11 +60,6 @@ export const StaffView: React.FC<StaffViewProps> = ({
   const [editFormError, setEditFormError] = useState<string | null>(null);
   const [editFormSuccess, setEditFormSuccess] = useState<string | null>(null);
 
-  // Association Settings (Phone printed on invoice)
-  const [phoneSetting, setPhoneSetting] = useState(() => dataService.getAssociationPhone());
-  const [phoneSuccess, setPhoneSuccess] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
-
   // Password reset alert
   const [resetModalInfo, setResetModalInfo] = useState<{
     staffName: string;
@@ -238,69 +233,6 @@ export const StaffView: React.FC<StaffViewProps> = ({
           <span>{bannerNotification.message}</span>
         </div>
       )}
-
-      {/* Association Phone Settings Card */}
-      <div className="bg-[#161D1A] border border-[#26312C] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3.5">
-        <div className="flex items-center justify-between pb-2.5 border-b border-[#26312C]">
-          <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-[#34C38F]" />
-            <h2 className="text-sm font-bold text-[#E8EDEA]">إعدادات الجمعية والفاتورة</h2>
-          </div>
-          <span className="text-[11px] text-[#8A9690] hidden xs:inline">يظهر على فواتير التسليم الرسمية</span>
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setPhoneError(null);
-            setPhoneSuccess(null);
-            const res = dataService.updateAssociationPhone(phoneSetting);
-            if (!res.success) {
-              setPhoneError(res.error || 'فشل تحديث رقم الهاتف');
-              return;
-            }
-            setPhoneSuccess('تم حفظ رقم هاتف الجمعية المطبوع على الفاتورة بنجاح');
-            setTimeout(() => setPhoneSuccess(null), 3000);
-            onRefresh();
-          }}
-          className="flex flex-col sm:flex-row sm:items-end gap-3 text-xs"
-        >
-          <div className="flex-1 space-y-1">
-            <label className="text-[#8A9690] flex items-center gap-1.5 font-medium">
-              <Phone className="w-3.5 h-3.5 text-[#34C38F]" />
-              <span>رقم هاتف الجمعية المطبوع على الفاتورة:</span>
-            </label>
-            <input
-              type="text"
-              value={phoneSetting}
-              onChange={(e) => setPhoneSetting(e.target.value)}
-              placeholder="01012345678"
-              className="w-full bg-[#1C2521] border border-[#26312C] rounded-xl px-3.5 py-2.5 text-[#E8EDEA] font-mono focus:outline-none focus:border-[#34C38F]"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="px-5 py-2.5 rounded-xl bg-[#34C38F] hover:bg-[#2bb27f] text-[#0F1412] font-bold transition shadow-sm cursor-pointer whitespace-nowrap self-stretch sm:self-auto"
-          >
-            حفظ إعدادات الفاتورة
-          </button>
-        </form>
-
-        {phoneSuccess && (
-          <div className="p-2.5 rounded-xl bg-[#34C38F]/15 border border-[#34C38F]/30 text-[#34C38F] text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            <span>{phoneSuccess}</span>
-          </div>
-        )}
-
-        {phoneError && (
-          <div className="p-2.5 rounded-xl bg-[#F0707A]/15 border border-[#F0707A]/30 text-[#F0707A] text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <span>{phoneError}</span>
-          </div>
-        )}
-      </div>
 
       {/* Staff Accounts Section */}
       <div className="bg-[#161D1A] border border-[#26312C] rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
@@ -734,7 +666,12 @@ export const StaffView: React.FC<StaffViewProps> = ({
                     maxLength={11}
                     className="w-full font-mono bg-[#1C2521] border border-[#26312C] rounded-xl px-3.5 py-2.5 text-[#E8EDEA] focus:outline-none focus:border-[#34C38F]"
                   />
-                  <span className="text-[10px] text-[#8A9690] mt-0.5 block">11 رقماً مصرياً</span>
+                  <div className="flex items-center justify-between text-[10px] mt-0.5">
+                    <span className="text-[#8A9690]">11 رقماً مصرياً</span>
+                    {editFormData.role === 'admin' && (
+                      <span className="text-[#34C38F] font-semibold">يظهر تلقائياً كهاتف الجمعية بالفاتورة</span>
+                    )}
+                  </div>
                 </div>
 
                 <div>
